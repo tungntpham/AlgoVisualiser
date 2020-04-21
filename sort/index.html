@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="styles.css">
+        <title>Sort Visualiser</title>
+    </head>
+    <body>
+        <div>
+            <select id="quantity" class="select-box">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <button id="gen-button" onclick="genChart()">Gen</button>
+
+            <select id="sort-type" class="select-box">
+                <option value="insertion">Insertion Sort</option>
+            </select>
+            <input id="speed-box" type="number" name="speed" value=100 min=1 max=100>
+            <button onclick="sort()">Sort</button>
+        </div>
+        <br/>
+        <canvas id="canvas" width="400" height="400" style="background-color:#DDDDDD">
+        </canvas>
+
+        <script>
+            let canvas = document.getElementById("canvas");
+            let ctx = canvas.getContext("2d");
+            let items = [];
+            let interval = 1000;
+
+            function genChart() {
+                let selBox = document.getElementById("quantity");
+                let num = selBox.options[selBox.selectedIndex].value;
+                items = createRandomArray(num);
+                drawChart(ctx, canvas, items);
+            }
+
+            function sort() {
+                let selBox = document.getElementById("sort-type");
+                let type = selBox.options[selBox.selectedIndex].value;
+
+                let speed = document.getElementById("speed-box").value;
+                interval = 1000 / speed;
+                switch (type) {
+                    case "insertion":
+                        insertionSort();
+                        break;
+                    default:
+                        console.log("Type not supported");
+                        break;
+                }
+            }
+
+            function insertionSort() {
+                let length = items.length;
+                let count = 1;
+                for (let i = 1; i < length; i++) {
+                    let key = items[i];
+                    let j = i - 1;
+                    setTimeout(drawChart, interval * (count++), ctx, canvas, JSON.parse(JSON.stringify(items)), i);
+                    while (j >= 0 && items[j] > key) {
+                        items[j + 1] = items[j];
+                        items[j] = key;
+                        j = j - 1;
+                        setTimeout(drawChart, interval * (count++), ctx, canvas, JSON.parse(JSON.stringify(items)), j + 1);
+                    }
+                }
+            }
+
+            function drawChart(ctx, canvas, items, cur) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let width = canvas.width / items.length - 1;
+                let height = 0;
+                for (let i = 0; i < items.length; i++) {
+                    height = items[i] * canvas.height;
+                    drawBar(ctx, i * (width + 1), canvas.height - height, width, items[i] * canvas.height, i == cur ? "#FF5500" : "#FF9900");
+                }
+            }
+
+            function drawBar(ctx, upperLeftCornerX, upperLeftCornerY, width, height,color){
+                ctx.save();
+                ctx.fillStyle=color;
+                ctx.fillRect(upperLeftCornerX,upperLeftCornerY,width,height);
+                ctx.restore();
+            }
+
+            function createRandomArray(noEs) {
+                let items = [];
+                for (let i = 0; i < noEs; i++) {
+                    items.push(Math.random());
+                }
+                return items;
+            }
+
+        </script>
+    </body>
+</html>
